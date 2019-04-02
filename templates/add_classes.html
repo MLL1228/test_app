@@ -1,0 +1,25 @@
+{% extends 'layout.html' %}
+
+{% block css %}
+
+{% endblock %}
+
+
+{% block content %}
+    <h1>班级添加</h1>
+    {{ message }}
+    <form action="/add_classes/" method="post">
+        <input type="text" name="caption">
+        <input type="submit" value="submit">
+
+    </form>
+
+{% endblock %}
+
+{% block js %}
+    <script>
+        $(function () {
+            $('#menu_class').addClass('active');
+        });
+    </script>
+{% endblock %}

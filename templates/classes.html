@@ -1,0 +1,191 @@
+{% extends 'layout.html' %}
+
+{% block css %}
+
+{% endblock %}
+
+
+{% block content %}
+    <h1>班级列表</h1>
+    <input id="id_add" type="button" value="ADD">
+    <a href="/add_classes">url 跳转添加</a>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>title</th>
+                <th>option</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in cls_obj %}
+                <tr>
+                    <td mylabel = "id">{{ item.id }}</td>
+                    <td mylabel = "caption">{{ item.caption }}</td>
+                    <td><a class="td-edit">修改</a> | <a target="_blank" href="/edit_class?nid={{ item.id }}">跳转修改</a> |<a class="td-delete">删除</a></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="pagination">
+        {{ page_list }}
+    </div>
+
+
+
+{#    模态对话框#}
+    <div class="model hide">
+        <form method="POST" action="/classes/">
+            <input type="text" placeholder="title" name="caption">
+            <input type="text" name="nid" class="hide">
+            <input id="id_model_cancel" type="button" value="cancel">
+            <input id="id_model_submit" type="submit" value="submit">
+            <input type="button" id="model_ajax_submit" value="ajax submit">
+        </form>
+    </div>
+    <div class="shadow hide"></div>
+    <div class="remove hide">
+        <form method="post" action="/del_class/">
+            <input class="hide" type="text" name="nid">
+            <input id="id_remove_cancel" type="button" value="cancel">
+            <input id="id_remove_submit" type="submit" value="submit">
+        </form>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script>
+        $(function () {
+            $('#menu_class').addClass('active');
+            bindaddevent();
+            bindcancelevent();
+            bindTdDelete();
+            bindajaxsubmit();
+            bindTdEdit()
+        });
+
+        {#SUBMIT_URL = "/classes/";#}
+        {#绑定事件#}
+        function bindaddevent() {
+            $('#id_add').click(function () {
+                $('.model, .shadow').removeClass('hide');
+                $("#id_model_submit").removeClass('hide');
+                SUBMIT_URL = "/classes/"
+            });
+        }
+
+        function bindcancelevent() {
+            $('#id_model_cancel, #id_remove_cancel').click(function () {
+                $('.model, .shadow, .remove').addClass('hide');
+            });
+        }
+        
+        function bindTdDelete() {
+            /* 普通方法，通过 ajax 添加的行无法实现此函数
+            $('td .td-delete').click(function () {
+                $('.remove, .shadow').removeClass('hide');
+            });
+            */
+
+            /*
+            委托
+             */
+            $('tbody').on('click', '.td-delete', function () {
+                $('.remove, .shadow').removeClass('hide');
+
+                var tds = $(this).parent().prevAll();
+                $('.remove input[name="nid"]').val(tds[1].innerText);
+            });
+        }
+
+        function bindTdEdit() {
+            /*
+            委托
+             */
+            $('tbody').on('click', '.td-edit', function () {
+                $('.model, .shadow').removeClass('hide');
+                $("#id_model_submit").addClass('hide');
+                SUBMIT_URL = "/up_class/"
+
+                var tds = $(this).parent().prevAll()
+                $('.model input[name="caption"]').val(tds[0].innerText)
+                $('.model input[name="nid"]').val(tds[1].innerText)
+
+                /*
+                $(this).parent().prevAll().each(function () {
+                    var text = $(this).text();
+                    var name = $(this).attr('mylabel');
+                    $('.model input[name = '+ name +']').val(text);
+                })
+                */
+
+
+            });
+        }
+
+
+        function bindajaxsubmit() {
+            $('#model_ajax_submit').click(function () {
+                var nid = $('.model input[name="nid" ]').val();
+                var value = $('.model input[name="caption" ]').val();
+                $.ajax({
+                    url: SUBMIT_URL,
+                    type: "POST",
+                    data: {caption: value, id: nid},
+                    dataType: "JSON",
+                    success: function (rep) {
+                        {#console.log(data);#}
+                        if(rep.info=='add'){
+                            if (!rep.status){
+                                alert(rep.error);
+                                console.log(rep.error);
+                            }else {
+                                {#location.reload();#}
+                                // 通过 js 在 table 表格最后增加一条数据
+                           {# <tr>#}
+                           {#     <td>{{ item.id }}</td>#}
+                           {#     <td>{{ item.caption }}</td>#}
+                           {#     <td><a>修改</a> | <a class="td-delete">删除</a></td>#}
+                           {#</tr>#}
+                            console.log(rep);
+                            var tr = document.createElement('tr');
+                            var td1 = document.createElement('td');
+                            var td2 = document.createElement('td');
+                            var td3 = document.createElement('td');
+                            td1.innerText = rep.data.nid;
+                            td2.innerText = rep.data.caption;
+                            td3.innerText = " | ";
+                            var a1 = document.createElement("a");
+                            var a2 = document.createElement("a");
+                            a1.innerHTML = "修改";
+                            a2.innerHTML = "删除";
+                            a2.className = 'td-delete';
+                            a1.className = 'td-edit';
+
+                            $(td3).prepend(a1);
+                            $(td3).append(a2);
+                            $(tr).append(td1);
+                            $(tr).append(td2);
+                            $(tr).append(td3);
+                            $('table tbody').append(tr);
+
+                            $('.model, .shadow').addClass('hide')
+                            }
+                        }
+                        else if(rep.info=='up'){
+                            if(rep.status){
+                                $('.model, .shadow').addClass('hide')
+                                /*
+                                //console.log($('# '+ rep.data.nid ))
+                                $('#'+ rep.data.nid ).nextSibling().innerText = rep.data.caption
+                                */
+                            }
+                        }
+                    }
+                });
+            });
+        }
+
+    </script>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends 'layout.html' %}
+
+{% block css %}
+
+{% endblock %}
+
+
+{% block content %}
+    <h1>班级编辑</h1>
+    {{ message }}
+    <form action="/edit_class/" method="post">
+        <input class="hide" name="nid" type="text" value="{{ obj.id }}">
+        <input type="text" name="caption" value="{{ obj.caption }}">
+        <input type="submit" value="submit">
+
+    </form>
+
+{% endblock %}
+
+{% block js %}
+    <script>
+        $(function () {
+            $('#menu_class').addClass('active');
+        });
+    </script>
+{% endblock %}

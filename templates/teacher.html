@@ -1,0 +1,174 @@
+{% extends 'layout.html' %}
+
+{% block css %}
+    <style>
+        .tag{
+            display: inline-block;
+            background-color: pink;
+            border: 1px solid red;
+            padding: 0px 5px;
+            cursor: pointer;
+        }
+        .add{
+            margin-bottom: 5px;
+        }
+    </style>
+{% endblock %}
+
+
+{% block content %}
+    <h1>老师列表</h1>
+    <div class="add">
+        <input id="add_teacher" type="button" value="add">
+    </div>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>id</th>
+                <th>name</th>
+                <th>class</th>
+            </tr>
+        </thead>
+        <tbody>
+{#            {% for item in teacher_list %}#}
+{#                <tr>#}
+{#                    <td>{{ item.id }}</td>#}
+{#                    <td>{{ item.name }}</td>#}
+{#                    <td>#}
+{#                        {% for c in item.cls.all %}#}
+{#                            <span nid="{{ c.id }}" class="tag">{{ c.caption }}</span>#}
+{#                        {% endfor %}#}
+{#                    </td>#}
+{#                </tr>#}
+{#            {% endfor %}#}
+            {% for key, value in teacher_list.items %}
+                <tr>
+                    <td id="td_{{ key }}">{{ key }}</td>
+                    <td>{{ value.name }}</td>
+                    <td class="tags">
+                        {% for item in value.cls %}
+                            <span class="tag" nid="{{ item.cls__id }}">{{ item.cls__caption }}</span>
+                            {% endfor %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="remove hide">
+        <form method="post" action="/del_teacher_cls/">
+            {{ msg }}
+            <input type="text" name="nid" class="hide">
+            <input type="text" name="cls_id" class="hide">
+            <input type="button" value="cancel" class="cancel_del_cls">
+            <input type="submit" name="submit">
+            <input type="button" value="ajaxsubmit" class="ajax_submit">
+        </form>
+    </div>
+    <div class="shadow hide"></div>
+    <div class="model hide">
+        <form method="post" action="/add_teacher/">
+            老师姓名：<input type="text" name="name">
+            选择课程：
+            <select class="select_cls hide" multiple="multiple">
+            </select>
+            <span id="msg" style="color: red"></span>
+            <input type="button" class="cancel_add_teacher" value="cancel">
+            <input type="button" class="ajax_add_teacher" value="ajax_submit">
+        </form>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script>
+        $(function () {
+            $('#menu_teacher').addClass('active');
+            bind_tag_del();
+            bind_cancel();
+            bind_ajax_submit();
+            bind_add_click();
+            bind_ajax_add_teacher();
+        })
+
+        function bind_tag_del() {
+            /*
+             委托
+             */
+            $('tbody').on('click', '.tag',function () {
+                $('.remove, .shadow').removeClass("hide");
+                $('.remove  input[name = "nid"]').val($(this).parent().prevAll()[1].innerText);
+                $('.remove  input[name = "cls_id"]').val($(this).attr("nid"));
+
+            });
+
+        }
+
+        function bind_cancel() {
+            $('.cancel_del_cls, .cancel_add_teacher').click(function () {
+                $('.remove, .shadow, .model, .select_cls').addClass('hide');
+            });
+        }
+
+        function bind_ajax_submit() {
+            $('.ajax_submit').click(function () {
+                let nid = $('.remove  input[name = "nid"]').val();
+                let cls_id = $('.remove  input[name = "cls_id"]').val();
+                $.ajax({
+                    url: "/del_teacher_cls/",
+                    type: 'POST',
+                    data: {nid: nid, cls_id: cls_id},
+                    dataType: "JSON",
+                    success: function (rep) {
+                        $('.remove, .shadow').addClass('hide');
+                        if (!rep.status){
+                            alert("try again")
+                        }
+                        else {
+                            console.log($('#td_'+ nid).innerText)
+                            console.log(nid);
+                            console.log('#td_'+ nid);
+                            console.log($('#td_'+ nid).parent().find('span[nid='+ cls_id + ']').html());
+                            $('#td_'+ nid).parent().find('span[nid='+ cls_id + ']').remove()
+                        }
+                    }
+
+                })
+            });
+        }
+
+        function bind_add_click() {
+                $('#add_teacher').click(function () {
+                    $('.model, .shadow').removeClass('hide');
+                    $.ajax({
+                        url: "/get_all_classes/",
+                        type: "post",
+                        data: {},
+                        dataType: "JSON",
+                        success: function(rep){
+                            if (!rep.status){
+                                $('#msg').html('error');
+                            }
+                            else {
+                                $('.select_cls').removeClass('hide');
+                                $.each(rep.data, function (index, item) {
+                                    $('.select_cls').append('<option value="'+ item.id + '">' + item.caption + '</option>');
+                                    console.log(item);
+                                });
+                            }
+                        }
+
+                    })
+                });
+        }
+        function bind_ajax_add_teacher() {
+            $('.ajax_add_teacher').click(function () {
+                let name = $(this).parent().find("input[name='name']").val()
+                let cls_list = $(".select_cls option")
+                console.log(cls_list)
+                $(".select_cls option").each(function () {
+                    console.log($(this).selected)
+                });
+            });
+        }
+    </script>
+{% endblock %}

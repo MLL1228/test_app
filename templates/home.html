@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>home</title>
+</head>
+<body>
+<h1>Manage System</h1>
+<a>ADD</a>
+
+<table>
+    <tr>
+        <td></td>
+    </tr>
+    {% for item in data %}
+        <tr>
+            <td>{{ item.caption }}</td>
+            <td><a item_id="{{ item.id }}" class="edit">edit</a> | <a item_id="{{ item.id }}" class="delete">delete</a></td>
+        </tr>
+    {% endfor %}
+</table>
+
+
+</body>
+</html>

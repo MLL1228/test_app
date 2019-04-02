@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>首页</title>
+    <style>
+        body{
+            margin: 0px;
+        }
+
+        {#规定 menu 和 item 的样式#}
+        .menu .item{
+            display: block;
+            padding: 5px 10px;
+            border-bottom: 1px solid #dddddd;
+        }
+        {#鼠标悬浮变色#}
+        .menu .item:hover{
+            background-color: black;
+            color: white;
+        }
+
+        .menu .item.active{
+            background-color: black;
+            color: white;
+        }
+
+        .hide{
+            display: none;
+        }
+
+        .model{
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 500px;
+            height: 400px;
+            margin-top: -250px;
+            margin-left: -250px;
+            z-index: 100;
+            background-color: white;
+        }
+
+        .remove{
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 400px;
+            height: 200px;
+            margin-top: -100px;
+            margin-left: -200px;
+            z-index: 100;
+            background-color: white;
+        }
+
+        .shadow{
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #000;
+            opacity: 0.5;
+            z-index: 99;
+        }
+
+        .pagination a{
+            display: inline-block;
+            padding: 5px;
+        }
+        .pagination a.active {
+            background-color: black;
+            color: white;
+        }
+
+    </style>
+    {% block css %} {% endblock %}
+</head>
+<body>
+<div style="height: 48px; background-color: black; color: white;">
+    <div style="float: right">username: {{ username }} | <a href="/logout.html">logout</a></div>
+</div>
+
+<div>
+    <div class="menu" style="position: absolute; top: 48px; left: 0px; bottom: 0px; width: 200px; background-color: #eeeeee">
+        <a id="menu_class" class="item" href="/classes">class</a>
+        <a id="menu_student" class="item" href="/student">student</a>
+        <a id="menu_teacher" class="item" href="/teacher">teacher</a>
+    </div>
+
+    <div style="position: absolute; top: 48px; left: 200px; bottom: 0px; right: 0px; overflow: auto">
+        {% block content %} {% endblock %}
+    </div>
+</div>
+<script src="/static/js/jquery-3.3.1.min.js"></script>
+{% block js %} {% endblock %}
+
+</body>
+</html>
